@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="header">
-      
-    </div>
+    <ul>
+      <li></li>
+    </ul>
   </div>
 </template>
 
@@ -13,8 +13,5 @@ export default {
 </script>
 
 <style>
-.header{
-  width: 1100px;
-
-}
+  
 </style>
