@@ -1,52 +1,39 @@
 <template>
-  <swiper ref="mySwiper" :options="swiperOptions" id="swiper">
-    <swiper-slide>Slide 1</swiper-slide>
-    <swiper-slide>Slide 2</swiper-slide>
-    <swiper-slide>Slide 3</swiper-slide>
-    <swiper-slide>Slide 4</swiper-slide>
-    <swiper-slide>Slide 5</swiper-slide>
+  <div>
+    <swiper ref="mySwiper" :options="swiperOptions" id="swiper">
+    <swiper-slide v-for="img in banners" :key="img.acm"><img :src="img.image" alt=""></swiper-slide>
     <div class="swiper-pagination" slot="pagination"></div>
   </swiper>
-  <!-- <div v-swiper:mySwiper="swiperOption" id="swiper">
-    <div class="swiper-wrapper">
-      <div class="swiper-slide" :key="banner" v-for="banner in banners">
-        <img :src="banner">
-        <div>{{banner}}</div>
-      </div>
-    </div>
-    <div class="swiper-pagination"></div>
-  </div> -->
+  </div>
 </template>
 
 <script>
-import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper'
+import { Swiper, SwiperSlide} from 'vue-awesome-swiper'
 import 'swiper/swiper-bundle.css'
 export default {
   components: {
     Swiper,
     SwiperSlide
   },
-  directives: {
-    swiper: directive
+  props:{
+    banners:{
+      type:Array,
+      default(){
+        return []
+      }
+    }
   },
-  data() {
+ data() {
       return {
-        swiperOption: {
+        swiperOptions: {
           notNextTick: true,
           pagination: {
-            el: '.swiper-pagination'
+            el: '.swiper-pagination',
+          },
+          autoplay:{
+            delay:1000
           },
           loop:true,
-          spaceBetween: 30,
-          centeredSlides: true,
-          autoplay: {
-            delay: 2500,
-            disableOnInteraction: false
-          },
-          pagination: {
-            el: '.swiper-pagination',
-            clickable: true
-          },
         }
       }
     },
@@ -56,16 +43,23 @@ export default {
       }
     },
     mounted() {
-      console.log('Current Swiper instance object', this.swiper)
-      // this.swiper.slideTo(1, 1000, false)
+      // console.log('Current Swiper instance object', this.swiper)
+      // this.myswiper = new Swiper('.swiper-container',{})
+      
+    },
+    updated(){
+      new Swiper('.swiper-container', {})
     }
 }
 </script>
 
 <style scoped>
   #swiper{
-    height: 200px;
-    background: red;
+    /* height: 200px; */
+    font-size: 0;
+  }
+  img{
+    width: 100%;
   }
   .swiper-pagination{
     /* background: ; */
