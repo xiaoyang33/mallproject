@@ -24,6 +24,10 @@ const routes = [
   {
     path:'/category',
     component:()=>import('views/category/Category')
+  },
+  {
+    path:'/detail/:iid',
+    component:()=>import('views/detail/Detail')
   }
 ]
 

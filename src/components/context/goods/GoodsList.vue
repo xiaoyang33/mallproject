@@ -1,9 +1,9 @@
 <template>
   <div class="goods">
     <ul>
-      <li v-for="item in goods" :key="item.iid">
-        <a :href="item.link">
-          <img :src="item.show.img" alt="">
+      <li v-for="item in goods" :key="item.acm" @click="itemClick(item.iid)">
+        <a  href="javascript:;">
+          <img :src="item.show.img" alt="" @load="ImageLoad">
         </a>
         <h5>{{item.title}}</h5>
         <p>
@@ -23,6 +23,15 @@ export default {
       defaule(){
         return []
       }
+    }
+  },
+  methods:{
+    ImageLoad(){
+      // console.log(1);
+      this.$bus.$emit('ImageLoad')
+    },
+    itemClick(iid){
+      this.$router.push('/detail/'+iid)
     }
   }
 }

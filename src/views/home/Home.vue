@@ -3,14 +3,31 @@
     <NavBar class="home-nav">
       <div slot="center">购物街</div>
     </NavBar>
-    <Scroll class="content" ref="scroll">
-      <Swiper :banners="banners"></Swiper>
+    
+      <TabControl
+        ref="tabcontrol1"
+       @tabClick="itemClick" 
+       class="fixed"
+       v-show="isFixed"
+       :titles="['流行','新款','精选']"></TabControl>
+    <Scroll
+      class="content"
+      ref="scroll"
+      :probe-type="3"
+      @scroll="contentScroll"
+      :pullUpLoad="true"
+      @pullingUp="loadMore"
+    >
+      <Swiper :banners="banners" @swiperImageLoad="swiperImageLoad"></Swiper>
       <RecommednView :recommends="recommends"></RecommednView>
       <FeatureView></FeatureView>
-      <TabControl class="control-bar" @tabClick="itemClick" :titles="['流行','新款','精选']"></TabControl>
+      <TabControl
+        ref="tabcontrol2"
+       @tabClick="itemClick" 
+       :titles="['流行','新款','精选']"></TabControl>
       <GoodsList :goods="showgoods"></GoodsList>
     </Scroll>
-    <BackTop @click.native="backClick"/>
+    <BackTop @click.native="backClick" v-show="isShowBackTop" />
   </div>
 </template>
 
@@ -20,13 +37,15 @@ import { getHomeMultiDate, getHomeGoods } from "network/home.js";
 import NavBar from "components/common/navbar/NavBar";
 import TabControl from "components/context/tabcontrol/TabControl";
 import GoodsList from "components/context/goods/GoodsList";
-import BackTop from 'components/context/backTop/BackTop'
+import BackTop from "components/context/backTop/BackTop";
 
 import Swiper from "./childComps/Swiper";
 import RecommednView from "./childComps/RecommendView";
 import FeatureView from "./childComps/FeatureView";
 
-import Scroll from 'components/common/scroll/Scroll';
+import Scroll from "components/common/scroll/Scroll";
+
+import {debounce}  from '../../common/utils'
 export default {
   components: {
     NavBar,
@@ -36,7 +55,7 @@ export default {
     TabControl,
     GoodsList,
     Scroll,
-    BackTop
+    BackTop,
   },
   data() {
     return {
@@ -57,13 +76,40 @@ export default {
         },
       },
       currentType: "pop",
+      isShowBackTop: false,
+      tabOffsetTop:0,
+      isFixed:false,
+      saveY:0
     };
+  },
+  destroyed(){
+    console.log(1);
+  },
+  activated(){
+    // console.log('active');
+    this.$refs.scroll.refresh()
+    this.$refs.scroll.scrollTo(0,this.saveY,0)
+  },
+  deactivated(){
+    // console.log(this.$refs.scroll.scroll.y);
+    this.saveY = this.$refs.scroll.scroll.y
+    // console.log(this.saveY);
   },
   created() {
     this.getHomeMultiDate();
     this.getGoods("pop");
     this.getGoods("new");
     this.getGoods("sell");
+    
+  },
+  mounted(){
+    // 图片加载刷新
+    const refre = debounce(this.$refs.scroll.refresh,20)
+    this.$bus.$on('ImageLoad',()=>{
+      // console.log(111);
+      // this.$refs.scroll.refresh()
+      refre()
+    })
   },
   computed: {
     showgoods() {
@@ -71,9 +117,24 @@ export default {
     },
   },
   methods: {
+    
     /* 
       事件监听
     */
+   swiperImageLoad(){
+    // 吸顶效果
+    // 组件下面有个$el可以拿到标签元素
+    // console.log(this.$refs.tabcontrol2.$el.offsetTop);
+    this.tabOffsetTop = this.$refs.tabcontrol2.$el.offsetTop
+   },
+   loadMore(){
+     this.getGoods(this.currentType)
+   },
+    contentScroll(position) {
+      //  console.log(position);
+      this.isShowBackTop = -position.y > 1000 ? true : false;
+      this.isFixed = -position.y > this.tabOffsetTop
+    },
     itemClick(index) {
       switch (index) {
         case 0:
@@ -85,9 +146,11 @@ export default {
         case 2:
           this.currentType = "sell";
       }
+      this.$refs.tabcontrol1.current = index
+      this.$refs.tabcontrol2.current = index
     },
-    backClick(){
-      this.$refs.scroll.scrollTo(0,0,500)
+    backClick() {
+      this.$refs.scroll.scrollTo(0, 0, 500);
     },
     /* 
       网络请求相关
@@ -106,6 +169,8 @@ export default {
         this.goods[type].list.push(...res.data.list);
       });
       this.goods[type].page++;
+      // console.log( this.goods[type].page++);
+      this.goods[type].page <= 2 ? null : this.$refs.scroll.finish()
     },
   },
 };
@@ -113,7 +178,7 @@ export default {
 
 <style scoped>
 #home {
-  padding-top: 44px;
+  /* padding-top: 44px; */
   position: relative;
   height: 100vh;
   box-sizing: border-box;
@@ -123,23 +188,21 @@ export default {
   color: #fff;
   font-size: 16px;
 
-  position: fixed;
-  top: 0;
+  position: relative;
+  /* top: 0;
   left: 0;
-  right: 0;
+  right: 0; */
   z-index: 9;
 }
-.control-bar {
-  position: sticky;
-  top: 43px;
+.fixed{
+  position: relative;
+  z-index: 9;
 }
-.content{
-  /* height: 300px; */
+.content {
   position: absolute;
   top: 44px;
   bottom: 49px;
   left: 0;
   right: 0;
-  /* overflow: hidden; */
 }
 </style>
