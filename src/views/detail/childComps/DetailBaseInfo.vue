@@ -36,6 +36,7 @@ export default {
 <style>
 .baseinfo{
   padding: 10px;
+  padding-bottom: 20px;
   color: #000;
   font-size: 14px;
   border-bottom: 2px solid #ddd;
@@ -64,7 +65,9 @@ export default {
   justify-content: space-between;
   font-size: 13px;
   color: #999;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ccc;
 }
 .wuliu{
   display: flex;

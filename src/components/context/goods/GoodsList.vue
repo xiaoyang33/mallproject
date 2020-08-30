@@ -1,9 +1,9 @@
 <template>
   <div class="goods">
     <ul>
-      <li v-for="item in goods" :key="item.acm" @click="itemClick(item.iid)">
+      <li v-for="item in goods" :key="item.acm" @click="itemClick(item.iid)" >
         <a  href="javascript:;">
-          <img :src="item.show.img" alt="" @load="ImageLoad">
+          <img v-lazy="show(item)" alt="" @load="ImageLoad">
         </a>
         <h5>{{item.title}}</h5>
         <p>
@@ -26,6 +26,10 @@ export default {
     }
   },
   methods:{
+    show(item){
+      // console.log(item);
+      return item.image || item.show.img
+    },
     ImageLoad(){
       // console.log(1);
       this.$bus.$emit('ImageLoad')
@@ -71,7 +75,7 @@ export default {
   height: 230px;
 }
 .goods ul li h5{
-  margin: 0;
+  margin: 10px 0 5px 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

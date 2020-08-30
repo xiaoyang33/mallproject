@@ -3,7 +3,6 @@
     <NavBar class="home-nav">
       <div slot="center">购物街</div>
     </NavBar>
-    
       <TabControl
         ref="tabcontrol1"
        @tabClick="itemClick" 
@@ -46,6 +45,7 @@ import FeatureView from "./childComps/FeatureView";
 import Scroll from "components/common/scroll/Scroll";
 
 import {debounce}  from '../../common/utils'
+import {itemImgLoad} from '../../common/minxins'
 export default {
   components: {
     NavBar,
@@ -79,7 +79,8 @@ export default {
       isShowBackTop: false,
       tabOffsetTop:0,
       isFixed:false,
-      saveY:0
+      saveY:0,
+      itemImgLoad:null
     };
   },
   destroyed(){
@@ -92,6 +93,7 @@ export default {
   },
   deactivated(){
     // console.log(this.$refs.scroll.scroll.y);
+    this.$bus.$off('ImageLoad',this.itemImgLoad)
     this.saveY = this.$refs.scroll.scroll.y
     // console.log(this.saveY);
   },
@@ -102,22 +104,13 @@ export default {
     this.getGoods("sell");
     
   },
-  mounted(){
-    // 图片加载刷新
-    const refre = debounce(this.$refs.scroll.refresh,20)
-    this.$bus.$on('ImageLoad',()=>{
-      // console.log(111);
-      // this.$refs.scroll.refresh()
-      refre()
-    })
-  },
+  mixins:[itemImgLoad],
   computed: {
     showgoods() {
       return this.goods[this.currentType].list;
     },
   },
   methods: {
-    
     /* 
       事件监听
     */
@@ -131,7 +124,6 @@ export default {
      this.getGoods(this.currentType)
    },
     contentScroll(position) {
-      //  console.log(position);
       this.isShowBackTop = -position.y > 1000 ? true : false;
       this.isFixed = -position.y > this.tabOffsetTop
     },
@@ -146,8 +138,6 @@ export default {
         case 2:
           this.currentType = "sell";
       }
-      this.$refs.tabcontrol1.current = index
-      this.$refs.tabcontrol2.current = index
     },
     backClick() {
       this.$refs.scroll.scrollTo(0, 0, 500);
@@ -169,8 +159,9 @@ export default {
         this.goods[type].list.push(...res.data.list);
       });
       this.goods[type].page++;
+      // this.$refs.scroll.finish()
       // console.log( this.goods[type].page++);
-      this.goods[type].page <= 2 ? null : this.$refs.scroll.finish()
+      this.goods[type].page < 2 ? null : this.$refs.scroll.finish()
     },
   },
 };
@@ -189,9 +180,6 @@ export default {
   font-size: 16px;
 
   position: relative;
-  /* top: 0;
-  left: 0;
-  right: 0; */
   z-index: 9;
 }
 .fixed{
