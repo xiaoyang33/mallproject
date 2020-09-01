@@ -1,4 +1,5 @@
 # my-project
+仿蘑菇街移动端商城vue练手项目
 
 ## Project setup
 ```
