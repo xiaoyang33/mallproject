@@ -45,7 +45,7 @@ export default {
 .bottom-bar{
   display: flex;
   align-items: center;
-
+  
   height: 40px;
   background: #eee;
 }

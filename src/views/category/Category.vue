@@ -1,122 +1,136 @@
 <template>
   <div class="warpper">
-    <ul>
-      <li>第1个</li>
-      <li>第2个</li>
-      <li>第3个</li>
-      <li>第4个</li>
-      <li>第5个</li>
-      <li>第6个</li>
-      <li>第7个</li>
-      <li>第8个</li>
-      <li>第9个</li>
-      <li>第10个</li>
-      <li>第11个</li>
-      <li>第12个</li>
-      <li>第13个</li>
-      <li>第14个</li>
-      <li>第15个</li>
-      <li>第16个</li>
-      <li>第17个</li>
-      <li>第18个</li>
-      <li>第19个</li>
-      <li>第20个</li>
-      <li>第21个</li>
-      <li>第22个</li>
-      <li>第23个</li>
-      <li>第24个</li>
-      <li>第25个</li>
-      <li>第26个</li>
-      <li>第27个</li>
-      <li>第28个</li>
-      <li>第29个</li>
-      <li>第30个</li>
-      <li>第31个</li>
-      <li>第32个</li>
-      <li>第33个</li>
-      <li>第34个</li>
-      <li>第35个</li>
-      <li>第36个</li>
-      <li>第37个</li>
-      <li>第38个</li>
-      <li>第39个</li>
-      <li>第40个</li>
-      <li>第41个</li>
-      <li>第42个</li>
-      <li>第43个</li>
-      <li>第44个</li>
-      <li>第45个</li>
-      <li>第46个</li>
-      <li>第47个</li>
-      <li>第48个</li>
-      <li>第49个</li>
-      <li>第50个</li>
-      <li>第51个</li>
-      <li>第52个</li>
-      <li>第53个</li>
-      <li>第54个</li>
-      <li>第55个</li>
-      <li>第56个</li>
-      <li>第57个</li>
-      <li>第58个</li>
-      <li>第59个</li>
-      <li>第60个</li>
-      <li>第61个</li>
-      <li>第62个</li>
-      <li>第63个</li>
-      <li>第64个</li>
-      <li>第65个</li>
-      <li>第66个</li>
-      <li>第67个</li>
-      <li>第68个</li>
-      <li>第69个</li>
-      <li>第70个</li>
-      <li>第71个</li>
-      <li>第72个</li>
-      <li>第73个</li>
-      <li>第74个</li>
-      <li>第75个</li>
-      <li>第76个</li>
-      <li>第77个</li>
-      <li>第78个</li>
-      <li>第79个</li>
-      <li>第80个</li>
-      <li>第81个</li>
-      <li>第82个</li>
-      <li>第83个</li>
-      <li>第84个</li>
-    </ul>
+    <NavBar class="nav">
+      <div slot="center">商品分类</div>
+    </NavBar>
+    <div class="container">
+      <TabCategory class="tab-category" :info="categoryInfo" @hasChange = "handleChange"/>
+      <Scroll class="rigth" ref="scroll">
+        <div class="right-item">
+          <TabContent :cate-content-info="cateContentInfo" @imgLoad="imgLoad"/>
+          <TabControl :titles="['综合','新品','销量']" @tabClick="tabClick"/>
+          <GoodsList :goods="goods[currentType]"/>
+        </div>
+      </Scroll>
+    </div>
   </div>
 </template>
 
 <script>
-import Btscroll from 'better-scroll'
+import getCategory from 'network/category'
+import {getSubcategory,getCategoryDetail} from 'network/category'
+import {debounce} from '../../common/utils'
+
+import NavBar from 'components/common/navbar/NavBar'
+import TabCategory from './childComps/TabCategory'
+import TabContent from './childComps/TabContent'
+import Scroll from 'components/common/scroll/Scroll'
+import TabControl from 'components/context/tabcontrol/TabControl'
+import GoodsList from 'components/context/goods/GoodsList'
 export default {
+  components:{
+    NavBar,
+    TabCategory,
+    TabContent,
+    Scroll,
+    TabControl,
+    GoodsList
+  },
   data(){
     return {
-      scroll:null
+      categoryInfo:[],
+      cateContentInfo:[],
+      refresh:null,
+      goods:{
+        pop:[],
+        sell:[],
+        new:[]
+      },
+      currentType:'pop',
+      miniWallkey:0
     }
   },
-
-  mounted(){
-    this.scroll =  new Btscroll('.warpper',{
-      probeType:3,
-      pullUpLoad:true
-    })
-    this.scroll.on('scroll',(position)=>{
-      // console.log(position);
-    })
-    this.scroll.on('pullingUp',()=>{
-      console.log(111);
-      this.scroll.finishPullUp()
+  created(){
+    getCategory().then(res=>{
+      // 左边列表
+      this.categoryInfo = res.data.category.list
+      // 加载就获取第一个流行信息
+      this.getSubcategory(this.categoryInfo[0].maitKey)
+      // 保存miniWallkey信息
+      this.miniWallkey = this.categoryInfo[0].miniWallkey
+      // 获取面分类信息
+      this.getAll()
+      // console.log(this.categoryInfo);
     })
   },
+  mounted(){
+     this.refresh = debounce(this.$refs.scroll.refresh,100)
+  },
+  methods:{
+    handleChange(maitKey,miniWallkey){
+      this.miniWallkey = miniWallkey
+      this.getSubcategory(maitKey)
+    },
+    // 获取数据右边上面列表数据
+    getSubcategory(maitKey){
+      getSubcategory(maitKey).then(res=>{
+        this.cateContentInfo = res.data.list
+      })
+    },
+    imgLoad(){
+      this.refresh()
+    },
+    tabClick(index){
+      switch(index){
+        case 0:
+          this.currentType='pop'
+          break;
+        case 1:
+          this.currentType = 'new'
+          break;
+        case 2:
+          this.currentType = 'sell'
+          break;
+      }
+    },
+    // 获取下方推荐商品
+    getDetail(type){
+      getCategoryDetail(this.miniWallkey,type).then(res=>{
+        this.goods[type] = res
+      })
+    },
+    getAll(){
+      this.getDetail('pop')
+      this.getDetail('new')
+      this.getDetail('sell')
+    }
+  },
+  watch:{
+    miniWallkey(){
+      this.getAll()
+    }
+  }
 }
 </script>
 
 <style>
-.warpper{
-  height: 200px;
+.nav{
+  background: var(--color-tint);
+  color: #fff;
+  font-weight: bold;
+}
+.container{
+  display: flex;
+}
+.tab-category{
+  width: 30%;
+}
+.rigth{
+  width: 70%;
+  height: calc(100vh - 40px - 49px);
   overflow: hidden;
+}
+.right-item{
+  padding: 30px  0;
 }
 </style>

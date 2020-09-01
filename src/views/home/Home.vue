@@ -84,7 +84,7 @@ export default {
     };
   },
   destroyed(){
-    console.log(1);
+    console.log('组件销毁了');
   },
   activated(){
     // console.log('active');

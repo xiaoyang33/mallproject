@@ -28,7 +28,7 @@ export default {
   methods:{
     show(item){
       // console.log(item);
-      return item.image || item.show.img
+      return item.img || item.image || item.show.img 
     },
     ImageLoad(){
       // console.log(1);
@@ -56,7 +56,7 @@ export default {
   /* box-sizing: border-box; */
 }
 .goods ul li{
-  width: 49.3%;
+  width: 49%;
   padding-right: 4px;
   box-sizing: border-box;
 }
